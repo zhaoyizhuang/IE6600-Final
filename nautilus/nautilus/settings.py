@@ -127,7 +127,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ALLOWED_HOSTS = [
     'zhaoyi-nautilus.netlify.app',
-    'zhaoyi-nautilus.herokuapp.com',
+    'https://nautilus-backend-d54920cfd6c4.herokuapp.com/',
     'localhost',
     '127.0.0.1',
 ]
