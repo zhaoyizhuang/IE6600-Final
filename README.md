@@ -1,6 +1,6 @@
 # IE6600-Final Zhaoyi Zhuang
 
-The project is deployed at https://zhaoyi-nautilus.netlify.app/
+The project is deployed at https://zhaoyi-ie6600.netlify.app/
 
 This project used Django for backend, Vue.js for frontend.
 

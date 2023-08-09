@@ -126,20 +126,20 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ALLOWED_HOSTS = [
-    'zhaoyi-nautilus.netlify.app',
+    'zhaoyi-ie6600.netlify.app',
     'nautilus-backend-d54920cfd6c4.herokuapp.com',
     'localhost',
     '127.0.0.1',
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://zhaoyi-nautilus.netlify.app',
+    'https://zhaoyi-ie6600.netlify.app',
     'http://localhost:8080',
     'http://127.0.0.1:8000',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://zhaoyi-nautilus.netlify.app',
+    'https://zhaoyi-ie6600.netlify.app',
     'http://localhost:8080',
     'http://127.0.0.1:8000',
 ]
