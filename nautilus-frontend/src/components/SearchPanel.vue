@@ -22,6 +22,9 @@
           @clicked="clicked(idx)"
         />
       </div>
+      <button class="tools comparison-tool" @click="getCorrelation">
+        Correlation
+      </button>
     </div>
     <ComparisonModal :show="showComparisonModal" @close="closeModal">
       <template v-slot:body>
@@ -36,6 +39,28 @@
         />
       </template>
     </ComparisonModal>
+    <ComparisonModal :show="showCorrelationModal" @close="closeModal">
+      <template v-slot:body>
+        <div>Current stock: {{ stockData.name }}</div>
+        <div v-if="correlationData['Highest']">
+          <div style="margin-top: 24px">
+            <div>Highest correlation: {{ correlationData["Highest"] }}</div>
+            <div>
+              Correlation factor:
+              {{ correlationData["Highest_Val"] }}
+            </div>
+          </div>
+          <div style="margin-top: 24px">
+            <div>Lowest correlation: {{ correlationData["Lowest"] }}</div>
+            <div>
+              Correlation factor:
+              {{ correlationData["Lowest_Val"] }}
+            </div>
+          </div>
+        </div>
+        <div v-else style="margin-top: 24px">No correlation data found</div>
+      </template>
+    </ComparisonModal>
   </div>
 </template>
 
@@ -45,6 +70,7 @@ import IntervalSelector from "./IntervalSelector.vue";
 import ComparisonModal from "./ComparisonModal.vue";
 import SearchBar from "./SearchBar.vue";
 import { inject } from "vue";
+import csvText from "../assets/corr.csv";
 
 export default {
   name: "SearchPanel",
@@ -71,6 +97,8 @@ export default {
       selectedIdx: 4,
       intervals: ["5D", "60D", "YTD", "1Y", "2Y"],
       showComparisonModal: false,
+      showCorrelationModal: false,
+      correlationData: {},
     };
   },
   watch: {
@@ -118,6 +146,16 @@ export default {
     closeModal() {
       this.showComparisonModal = false;
       this.badComparisonData = false;
+      this.showCorrelationModal = false;
+    },
+    getCorrelation() {
+      for (let i = 0; i < csvText.length; i++) {
+        if (csvText[i][""] === this.stockData.ticker) {
+          this.correlationData = csvText[i];
+          break;
+        }
+      }
+      this.showCorrelationModal = true;
     },
   },
   mounted() {

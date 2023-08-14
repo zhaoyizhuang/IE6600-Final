@@ -67,6 +67,7 @@ class StockViewSet(viewsets.ViewSet):
             json_format_data = data.to_json(orient="split", date_format="epoch")
             result = json.loads(json_format_data)
             result["name"] = name + " (" + ticker + ")"
+            result["ticker"] = ticker
             result["index"] = [
                 datetime.datetime.fromtimestamp(x / 1000.0).strftime(time_format)
                 for x in result["index"]
