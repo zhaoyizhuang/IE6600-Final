@@ -22,6 +22,9 @@
           @clicked="clicked(idx)"
         />
       </div>
+      <button class="tools comparison-tool" @click="show500Modal = true">
+        S&P500
+      </button>
       <button class="tools comparison-tool" @click="getCorrelation">
         Correlation
       </button>
@@ -114,6 +117,11 @@
         <div v-else style="margin-top: 24px">No actionable Signals</div>
       </template>
     </ComparisonModal>
+    <ComparisonModal :show="show500Modal" @close="closeModal" width="800px">
+      <template v-slot:body>
+        <SP500Chart />
+      </template>
+    </ComparisonModal>
   </div>
 </template>
 
@@ -122,6 +130,7 @@ import stockService from "../services/stockService";
 import IntervalSelector from "./IntervalSelector.vue";
 import ComparisonModal from "./ComparisonModal.vue";
 import SearchBar from "./SearchBar.vue";
+import SP500Chart from "./SP500.vue";
 import { inject } from "vue";
 import csvText from "../assets/corr.csv";
 
@@ -131,6 +140,7 @@ export default {
     IntervalSelector,
     ComparisonModal,
     SearchBar,
+    SP500Chart,
   },
   setup() {
     const stockData = inject("stockDataKey");
@@ -152,6 +162,7 @@ export default {
       showComparisonModal: false,
       showCorrelationModal: false,
       showSignalModal: false,
+      show500Modal: false,
       correlationData: {},
       signals: [],
     };
@@ -203,6 +214,7 @@ export default {
       this.badComparisonData = false;
       this.showCorrelationModal = false;
       this.showSignalModal = false;
+      this.show500Modal = false;
     },
     getCorrelation() {
       for (let i = 0; i < csvText.length; i++) {
@@ -214,10 +226,15 @@ export default {
       this.showCorrelationModal = true;
     },
     getSignals() {
-      stockService.getSignals(this.stockData.ticker).then((data) => {
-        this.signals = data.data;
-        this.showSignalModal = true;
-      });
+      stockService
+        .getSignals(this.stockData.ticker)
+        .then((data) => {
+          this.signals = data.data;
+          this.showSignalModal = true;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
   mounted() {
@@ -271,7 +288,7 @@ export default {
 .tools {
   display: inline-block;
   position: relative;
-  left: 37%;
+  left: 30%;
   margin: 5px;
 }
 

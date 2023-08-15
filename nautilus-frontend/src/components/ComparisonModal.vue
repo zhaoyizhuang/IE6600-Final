@@ -2,7 +2,7 @@
   <Transition name="modal">
     <div v-if="show" class="modal-mask">
       <div class="modal-wrapper">
-        <div class="modal-container">
+        <div class="modal-container" :style="style">
           <div class="modal-body">
             <slot name="body">default body</slot>
           </div>
@@ -25,6 +25,17 @@ export default {
   name: "ComparisonModal",
   props: {
     show: Boolean,
+    width: {
+      type: String,
+      default: "400px",
+    },
+  },
+  computed: {
+    style() {
+      return {
+        width: this.width,
+      };
+    },
   },
 };
 </script>
@@ -46,7 +57,6 @@ export default {
   vertical-align: middle;
 }
 .modal-container {
-  width: 400px;
   margin: 0px auto;
   padding: 20px 30px;
   background-color: #fff;
