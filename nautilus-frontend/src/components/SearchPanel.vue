@@ -25,6 +25,7 @@
       <button class="tools comparison-tool" @click="getCorrelation">
         Correlation
       </button>
+      <button class="tools comparison-tool" @click="getSignals">Signals</button>
     </div>
     <ComparisonModal :show="showComparisonModal" @close="closeModal">
       <template v-slot:body>
@@ -59,6 +60,58 @@
           </div>
         </div>
         <div v-else style="margin-top: 24px">No correlation data found</div>
+      </template>
+    </ComparisonModal>
+    <ComparisonModal :show="showSignalModal" @close="closeModal">
+      <template v-slot:body>
+        <div>Current stock: {{ stockData.name }}</div>
+        <div
+          v-if="signals"
+          style="margin-top: 12px; max-height: 500px; overflow-y: auto"
+        >
+          <span style="margin-left: 100px">One Month</span>
+          <span style="margin-left: 30px">Three Months</span>
+          <span style="margin-left: 30px">Half Year</span>
+          <div v-for="(item, index) in signals" :key="index">
+            <div class="signals" style="margin-top: 5px">
+              <span>{{ item.Date }}</span>
+              <span
+                v-if="item['One Month'] && item['One Month']['Rise']"
+                style="color: green"
+                >{{ item["One Month"]["Rise"] }}
+              </span>
+              <span
+                v-else-if="item['One Month'] && item['One Month']['Drop']"
+                style="color: red"
+                >{{ item["One Month"]["Drop"] }}
+              </span>
+              <span v-else></span>
+              <span
+                v-if="item['Three Months'] && item['Three Months']['Rise']"
+                style="color: green"
+                >{{ item["Three Months"]["Rise"] }}
+              </span>
+              <span
+                v-else-if="item['Three Months'] && item['Three Months']['Drop']"
+                style="color: red"
+                >{{ item["Three Months"]["Drop"] }}
+              </span>
+              <span v-else></span>
+              <span
+                v-if="item['Half Year'] && item['Half Year']['Rise']"
+                style="color: green"
+                >{{ item["Half Year"]["Rise"] }}
+              </span>
+              <span
+                v-else-if="item['Half Year'] && item['Half Year']['Drop']"
+                style="color: red"
+                >{{ item["Half Year"]["Drop"] }}
+              </span>
+              <span v-else></span>
+            </div>
+          </div>
+        </div>
+        <div v-else style="margin-top: 24px">No actionable Signals</div>
       </template>
     </ComparisonModal>
   </div>
@@ -98,7 +151,9 @@ export default {
       intervals: ["5D", "60D", "YTD", "1Y", "2Y"],
       showComparisonModal: false,
       showCorrelationModal: false,
+      showSignalModal: false,
       correlationData: {},
+      signals: [],
     };
   },
   watch: {
@@ -147,6 +202,7 @@ export default {
       this.showComparisonModal = false;
       this.badComparisonData = false;
       this.showCorrelationModal = false;
+      this.showSignalModal = false;
     },
     getCorrelation() {
       for (let i = 0; i < csvText.length; i++) {
@@ -156,6 +212,12 @@ export default {
         }
       }
       this.showCorrelationModal = true;
+    },
+    getSignals() {
+      stockService.getSignals(this.stockData.ticker).then((data) => {
+        this.signals = data.data;
+        this.showSignalModal = true;
+      });
     },
   },
   mounted() {
@@ -235,5 +297,16 @@ export default {
 .comparison-tool:hover {
   color: rgb(0, 183, 255);
   cursor: pointer;
+}
+
+.signals {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.signals span {
+  display: table-cell;
+  text-align: center;
 }
 </style>

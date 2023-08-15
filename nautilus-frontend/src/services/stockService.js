@@ -13,4 +13,8 @@ export default {
     });
     return response.data;
   },
+  async getSignals(id) {
+    const response = await api.get(`stock/${id}/signals`);
+    return response.data;
+  },
 };

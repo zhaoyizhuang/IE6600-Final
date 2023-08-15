@@ -183,3 +183,109 @@ class StockViewSet(viewsets.ViewSet):
                 raise ValueError
             
             return (ticker, name, time_format, hist)
+
+    @action(detail=True, methods=['get'])
+    def signals(self, request, pk=None):
+        try:
+            stock = yf.Ticker(pk)
+            hist = stock.history(period="2Y")
+            hist = hist[['Close']]
+            hist = hist.reset_index()
+
+            hist_reverse = hist.sort_index(ascending=False)
+            current_price = hist_reverse.iloc[0]['Close']
+            high_stop = current_price * 1.06
+            low_stop = current_price * 0.94
+            signal = "No Signal"
+            for _, row in hist_reverse.iterrows():
+                close = row['Close']
+                if close > high_stop:
+                    signal = "Drop"
+                    break
+                elif close < low_stop:
+                    signal = "Rise"
+                    break
+
+            if signal == "No Signal":
+                return Response(data={"data": []})
+            else:
+                nums = self._drops(hist) if signal == "Drop" else self._rises(hist)
+                if len(nums) == 0:
+                    return Response(data={"data": []})
+                else:
+                    return Response(data={"data": self._get_signals(nums, hist)})
+                
+        except ValueError:
+            return Response(data={"data": []})
+        
+
+    def _drops(self, hist):
+        high = hist.iloc[0]
+        stop = high['Close'] * 0.94
+        drops = []
+        for index, row in hist.iterrows():
+            close = row['Close']
+            if high['Close'] < close:
+                high = row
+                stop = high['Close'] * 0.94
+            if close < stop:
+                drops.append(index)
+                high = row
+                stop = high['Close'] * 0.94
+        return drops
+    
+    def _rises(self, hist):
+        low = hist.iloc[0]
+        stop = low['Close'] * 1.06
+        rises = []
+        for index, row in hist.iterrows():
+            close = row['Close']
+            if low['Close'] > close:
+                low = row
+                stop = low['Close'] * 1.06
+            if close > stop:
+                rises.append(index)
+                low = row
+                stop = low['Close'] * 1.06
+        return rises
+    
+    def _get_signals(self, nums, hist):
+        def percent(left, right):
+            return str(round((abs(left - right)/left) * 100, 2)) + "%"
+        result = []
+        for index in nums:
+            analysis = {
+                "Date": hist.iloc[index]['Date'].strftime("%m/%d/%Y"),
+                "One Month": {},
+                "Three Months": {},
+                "Half Year": {}
+            }
+            index_price = hist.iloc[index]['Close']
+            
+            half_year = index + 126
+            if half_year < len(hist):
+                half_year_price = hist.iloc[half_year]['Close']
+                if half_year_price > index_price:
+                    analysis["Half Year"] = {"Rise": percent(index_price, half_year_price)}
+                else:
+                    analysis["Half Year"] = {"Drop": percent(index_price, half_year_price)}
+                    
+            three_months = index + 63
+            if three_months < len(hist):
+                three_months_price = hist.iloc[three_months]['Close']
+                if three_months_price > index_price:
+                    analysis["Three Months"] = {"Rise": percent(index_price, three_months_price)}
+                else:
+                    analysis["Three Months"] = {"Drop": percent(index_price, three_months_price)}
+                    
+            one_month = index + 21
+            if one_month < len(hist):
+                one_month_price = hist.iloc[one_month]['Close']
+                if one_month_price > index_price:
+                    analysis["One Month"] = {"Rise": percent(index_price, one_month_price)}
+                else:
+                    analysis["One Month"] = {"Drop": percent(index_price, one_month_price)}
+                    
+            result.append(analysis)
+                    
+        return result
